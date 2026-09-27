@@ -1,0 +1,4 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+
+export default async function Home(){const supabase=await createClient(); const {data}=await supabase.auth.getClaims(); if(data?.claims) redirect('/dashboard'); return <main style={{minHeight:'100vh',display:'grid',placeItems:'center',padding:24}}><div style={{maxWidth:720,textAlign:'center'}}><div className="eyebrow">AI COMPLIANCE OPERATING SYSTEM</div><h1 style={{fontSize:56,lineHeight:1.05,margin:'12px 0'}}>Compliance, without the spreadsheet chaos.</h1><p className="muted" style={{fontSize:18,lineHeight:1.6}}>ComplyOS helps SMEs organize compliance documents, track deadlines, detect risks and keep every responsibility visible in one place.</p><div style={{display:'flex',justifyContent:'center',gap:10,marginTop:24}}><a className="btn primary" href="/login">Start Free</a><a className="btn" href="#">Book a Demo</a></div></div></main>}
