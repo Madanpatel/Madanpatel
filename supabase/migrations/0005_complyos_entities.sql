@@ -1,0 +1,12 @@
+create table if not exists public.legal_entities (id uuid primary key default gen_random_uuid(), organization_id uuid not null references public.organizations(id) on delete cascade, name text not null, legal_name text, registration_number text, tax_identifier text, entity_type text, country text, state text, status text not null default 'ACTIVE', created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists public.locations (id uuid primary key default gen_random_uuid(), organization_id uuid not null references public.organizations(id) on delete cascade, legal_entity_id uuid references public.legal_entities(id) on delete set null, name text not null, location_type text, address text, city text, state text, postal_code text, country text, active boolean not null default true, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists public.departments (id uuid primary key default gen_random_uuid(), organization_id uuid not null references public.organizations(id) on delete cascade, name text not null, description text, manager_user_id uuid references auth.users(id), created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create index if not exists idx_entities_org on public.legal_entities(organization_id);
+create index if not exists idx_locations_org on public.locations(organization_id);
+create index if not exists idx_departments_org on public.departments(organization_id);
+alter table public.legal_entities enable row level security;
+alter table public.locations enable row level security;
+alter table public.departments enable row level security;
+create policy "entities_org_access" on public.legal_entities for all using (public.is_org_member(organization_id)) with check (public.is_org_member(organization_id));
+create policy "locations_org_access" on public.locations for all using (public.is_org_member(organization_id)) with check (public.is_org_member(organization_id));
+create policy "departments_org_access" on public.departments for all using (public.is_org_member(organization_id)) with check (public.is_org_member(organization_id));
