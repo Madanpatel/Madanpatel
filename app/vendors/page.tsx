@@ -1,0 +1,9 @@
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+
+export default async function VendorsPage(){
+ const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser();
+ const {data:m}=user?await supabase.from('organization_members').select('organization_id').eq('user_id',user.id).eq('status','ACTIVE').maybeSingle():{data:null}
+ const {data:items=[]}=m?await supabase.from('vendors').select('id,name,category,status,risk_level,email').eq('organization_id',m.organization_id).order('name').limit(100):{data:[]}
+ return <div className="shell"><aside className="sidebar"><div className="brand">ComplyOS</div><nav className="nav">{[['Dashboard','/dashboard'],['Documents','/documents'],['Compliance','/compliance'],['Tasks','/tasks'],['Risks','/risks'],['Vendors','/vendors'],['AI Copilot','/copilot']].map(([x,h])=><Link className={x==='Vendors'?'active':''} key={x} href={h}>{x}</Link>)}</nav></aside><main className="main"><header className="topbar"><div><div className="eyebrow">Third-party compliance</div><div className="h1">Vendors</div><p className="muted">Track vendor ownership, risk and evidence.</p></div><button className="btn primary">Add vendor</button></header><section className="card"><div className="section-title">Vendor register</div>{items.length===0?<div className="empty">No vendors have been added.</div>:<div className="table"><div className="table-head"><span>Vendor</span><span>Category</span><span>Risk</span><span>Status</span></div>{items.map(x=><div className="table-row" key={x.id}><span><b>{x.name}</b><small>{x.email??'No contact email'}</small></span><span>{x.category??'Uncategorized'}</span><span><span className="badge neutral">{x.risk_level}</span></span><span><span className="badge neutral">{x.status}</span></span></div>)}</div>}</section></main></div>
+}
