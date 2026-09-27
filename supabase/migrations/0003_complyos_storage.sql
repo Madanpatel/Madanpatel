@@ -1,0 +1,5 @@
+insert into storage.buckets (id,name,public) values ('documents','documents',false),('reports','reports',false),('avatars','avatars',false),('organization-assets','organization-assets',false) on conflict (id) do update set public=false;
+create policy "tenant document storage read" on storage.objects for select using (bucket_id='documents' and public.is_org_member((storage.foldername(name))[1]::uuid));
+create policy "tenant document storage insert" on storage.objects for insert with check (bucket_id='documents' and public.is_org_member((storage.foldername(name))[1]::uuid));
+create policy "tenant document storage update" on storage.objects for update using (bucket_id='documents' and public.is_org_member((storage.foldername(name))[1]::uuid)) with check (bucket_id='documents' and public.is_org_member((storage.foldername(name))[1]::uuid));
+create policy "tenant document storage delete" on storage.objects for delete using (bucket_id='documents' and public.is_org_member((storage.foldername(name))[1]::uuid));
