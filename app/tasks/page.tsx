@@ -1,0 +1,9 @@
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+
+export default async function TasksPage(){
+ const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser();
+ const {data:m}=user?await supabase.from('organization_members').select('organization_id').eq('user_id',user.id).eq('status','ACTIVE').maybeSingle():{data:null}
+ const {data:items=[]}=m?await supabase.from('tasks').select('id,title,status,priority,due_date').eq('organization_id',m.organization_id).order('due_date',{ascending:true}).limit(100):{data:[]}
+ return <div className="shell"><aside className="sidebar"><div className="brand">ComplyOS</div><nav className="nav">{[['Dashboard','/dashboard'],['Documents','/documents'],['Compliance','/compliance'],['Tasks','/tasks'],['Risks','/risks'],['Vendors','/vendors'],['AI Copilot','/copilot']].map(([x,h])=><Link className={x==='Tasks'?'active':''} key={x} href={h}>{x}</Link>)}</nav></aside><main className="main"><header className="topbar"><div><div className="eyebrow">Work management</div><div className="h1">Tasks</div><p className="muted">Assignments generated from compliance obligations and risks.</p></div><button className="btn primary">Create task</button></header><section className="card"><div className="section-title">Task queue</div>{items.length===0?<div className="empty">No tasks are assigned to this organization yet.</div>:<div className="table"><div className="table-head"><span>Task</span><span>Due</span><span>Priority</span><span>Status</span></div>{items.map(x=><div className="table-row" key={x.id}><span><b>{x.title}</b></span><span>{x.due_date??'No due date'}</span><span><span className="badge neutral">{x.priority}</span></span><span><span className="badge neutral">{x.status}</span></span></div>)}</div>}</section></main></div>
+}
